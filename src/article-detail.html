@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="article-meta-data.html">
 
 <dom-module id="article-detail">
 
@@ -53,8 +54,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     .card-container {
       position: relative;
-      width: 720px;
-      margin: 300px auto 40px;
+      width: 85%;
+      margin: 40px auto 0 auto;
+    }
+
+    .js-progressiveMedia-image.alignleft {
+      float: left;
+      margin-right: 10px;
     }
 
     paper-fab {
@@ -67,9 +73,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     paper-card {
-      padding: 16px 0 16px 100px;
       width: 100%;
-      sizing: border-box;
     }
 
     paper-card p {
@@ -98,15 +102,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       @apply --layout-flex;
     }
 
+    .size-full {
+      width: 100%;
+      height: auto;
+    }
+
+    .article-meta-data {
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--paper-card-header-color, #000);
+    }
+
     @media (max-width: 720px) {
 
       .card-container {
         width: 100%;
         margin: 150px 0 0;
       }
-
     }
-
     </style>
 
     <!-- main panel -->
@@ -121,66 +135,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-icon-button icon="app:arrow-back"></paper-icon-button>
           </a>
 
-          <div main-title></div>
-
-          <paper-menu-button horizontal-align="right">
-            <paper-icon-button icon="app:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
-            <paper-listbox class="dropdown-content">
-              <paper-icon-item>
-                <iron-icon icon="app:share" slot="item-icon"></iron-icon>
-                Tweet recipe
-              </paper-icon-item>
-              <paper-icon-item>
-                <iron-icon icon="app:email" slot="item-icon"></iron-icon>
-                Email recipe
-              </paper-icon-item>
-              <paper-icon-item>
-                <iron-icon icon="app:textsms" slot="item-icon"></iron-icon>
-                Message recipe
-              </paper-icon-item>
-              <paper-icon-item>
-                <iron-icon icon="app:group" slot="item-icon"></iron-icon>
-                Share on Facebook
-              </paper-icon-item>
-            </paper-listbox>
-          </paper-menu-button>
+          <div main-title>Back to Article Listings</div>
         </app-toolbar>
 
       </app-header>
 
       <div class="card-container">
-
-        <paper-card heading="{{recipe.name}}">
-          <div class="card-content">
-
-            <p>{{recipe.description}}</p>
-
-            <h4>Ingredients</h4>
-
-            <template is="dom-repeat" items="{{recipe.ingredients}}">
-              <div class="ingredient-item">
-                <div class="ingredient-amount">{{item.amount}}</div>
-                <div class="ingredient-name">{{item.description}}</div>
-              </div>
-            </template>
-
-            <h4>Steps</h4>
-
-            <template is="dom-repeat" items="{{recipe.steps}}">
-              <div class="ingredient-item">
-                <div class="ingredient-amount">{{item.duration}}</div>
-                <div class="ingredient-name">{{item.description}}</div>
-              </div>
-            </template>
-
-          </div>
+        <paper-card>
+          <article-meta-data></article-meta-data>
+          <div class="article-detail-container card-content"></div>
         </paper-card>
-
         <paper-fab icon="{{__computeFavIcon(__favorite)}}" on-tap="__toggleFavorite"></paper-fab>
       </div>
 
     </app-header-layout>
-
   </template>
 
   <script>
@@ -206,6 +174,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     __articleChanged: function(article) {
       if (article) {
         this.style.backgroundImage = 'url(' + article.headerImage + ')';
+        const articleMetaDataElem = this.shadowRoot.querySelector('article-meta-data');
+        articleMetaDataElem.article = article;
+        const articleContainerElem = this.shadowRoot.querySelector('.article-detail-container');
+        articleContainerElem.innerHTML = article.post_content;
       }
     },
 

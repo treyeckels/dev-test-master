@@ -183,70 +183,95 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'articles-app',
 
     properties: {
-
+      /**
+       * The payload from the server
+       * @prop {Array.<Object.<string>>}
+       */
       model: Array,
-
+      /**
+       * The Route object -- data provided by the Polymer App Router
+       * @prop {Object.<string>}
+       */
       _route: Object,
-
+      /**
+       * The Sub Route object - data provided by the Polymer App Router
+       * @prop {Object.<string>}
+       */
       _subRoute: Object,
-
+      /**
+       * The page data object - data provided by the Polymer App Router
+       * @prop {Object.<string>}
+       */
       _pageData: {
         type: Object,
         observer: '_pageDataChanged'
       },
-
+      /**
+       * This comes from a property of the _pageData object given to us by the
+       * app router
+       * @prop {string}
+       */
       _selectedPage: String,
-
+      /**
+       * This comes from a property of the _idData object given to us by the
+       * app router. It represents the id of the article being viewed on the
+       * detail page. Note: We are using the article name so that the url
+       * is more SEO and user friendly vs the article ID with the assumption
+       * that the article name would always be unique.
+       * @prop string
+       */
       _idData: Object,
-
+      /**
+       * This alllows us to keep track of the scroll position so that when
+       * the user navigates to another view and then returns, the scroll position
+       * will be in the same Y coordinate as befor scrolling.
+       * @prop {Object.<number>}
+       */
       _scrollPositionMap: {
         type: Object,
-        value: function() {
+        value() {
           return {};
         }
       }
     },
 
-    attached: function() {
-      this.async(function() {
-        if (!this._route.path) {
-          this.set('_route.path', '/home');
-        }
-      });
-    },
-
+    /**
+     * Gets the article from the payload/model via matching the subroute id
+     * with the article name. It could be useful later to abstract this
+     * out 1 more layer to be able to get the article based on other model
+     * props by padding in the prop as an argument.
+     */
     _getArticle: function() {
       if (this.model && this._idData && this._idData.id) {
+        // Using a for loop here instead of a array.forEach
+        // so that we can exit ASAP when we find the article
         for (var i = 0; i < this.model.length; ++i) {
-          var r = this.model[i];
-          if (r.post_name === this._idData.id) {
-            return r;
+          var currentObj = this.model[i];
+          if (currentObj.post_name === this._idData.id) {
+            return currentObj;
           }
         }
       }
       return null;
     },
-
+    /**
+     * Ensures the drawer is closed when user clicks elsewhere on page.
+     */
     _drawerSelected: function() {
-      if (!this.$.drawer.persistent) this.$.drawer.close();
+      if (!this.$.drawer.persistent) {
+        this.$.drawer.close();
+      }
     },
 
     /**
-     * Preserves the document scroll position, so
-     * it can be restored when returning to a page.
+     * Sets the selected page when the app router is engaged by user. App router
+     * passes in the pageData object.
+     * @param {Object.<string>} pageData The page data object from the app router,
+     * which gives us information regarding the app location to which the user
+     * is nvaigating.
      */
-    _pageDataChanged: function(pageData, oldPageData) {
-      var map = this._scrollPositionMap;
-
-      if (oldPageData != null && oldPageData.page != null) {
-        map[oldPageData.page] = window.pageYOffset;
-      }
+    _pageDataChanged: function(pageData) {
       this._selectedPage = pageData.page;
-      if (map[pageData.page] != null) {
-        Polymer.AppLayout.scroll({ top: map[pageData.page], behavior: 'silent' });
-      } else if (this.isAttached) {
-        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-      }
     }
 
   });

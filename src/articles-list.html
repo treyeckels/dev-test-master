@@ -30,25 +30,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     app-toolbar {
-      height: 120px;
+      height: 64px;
     }
 
-    [condensed-title] {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-image: url('//app-layout-assets.appspot.com/assets/pesto/logo_m.png');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: 90px;
-
-      /* The difference in font size is used to calculate the scale of the title in the transition. */
-      font-size: 16px;
-    }
-
-    /* styles for '...' */
+    /* styles for '...' shamelessly taken from http://hackingui.com/front-end/a-pure-css-solution-for-multiline-text-truncation/ */
     .post-teaser {
       /* hide text if it more than N lines  */
       overflow: hidden;
@@ -90,23 +75,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background: white;
     }
 
-    [main-title] {
-      position: absolute;
-      top: -120px;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-image: url('//app-layout-assets.appspot.com/assets/pesto/logo_l.png');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: 240px;
-      -webkit-transform-origin: center top !important;
-      transform-origin: center top !important;
-
-      /* The difference in font size is used to calculate the scale of the title in the transition. */
-      font-size: 32px;
-    }
-
     .content {
       display: block;
       position: relative;
@@ -126,7 +94,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       margin: 5px;
 
       --paper-card-header-image: {
-        height: 150px;
+        height: 200px;
       }
     }
 
@@ -164,23 +132,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 60px;
       }
 
-      [condensed-title] {
-        background-image: url('//app-layout-assets.appspot.com/assets/pesto/logo_s.png');
-        background-size: 60px;
-      }
-
-      [main-title] {
-        top: -60px;
-        background-image: url('//app-layout-assets.appspot.com/assets/pesto/logo_m.png');
-        background-size: 90px;
-      }
-
       .content {
         max-width: 400px;
       }
 
       .card-container {
         width: 100%;
+      }
+
+      .page-title {
+        padding: 7px;
       }
     }
 
@@ -192,22 +153,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header effects="resize-title" condenses fixed shadow slot="header">
         <app-toolbar class="top-toolbar">
           <slot name="drawer-toggle"></slot>
-          <div condensed-title></div>
-        </app-toolbar>
-        <app-toolbar class="bottom-toolbar">
-          <div main-title></div>
+          <div condensed-title>Eng Test</div>
         </app-toolbar>
       </app-header>
 
       <div class="content">
-        <h2>Latest Articles</h2>
+        <h2 class="page-title">Latest Articles</h2>
         <template is="dom-repeat" items="{{model}}"><!-- No empty text node
         --><a href="#/detail/{{item.post_name}}" class="card-container">
             <paper-card image="{{item.headerImage}}">
               <div class="card-content">
-                <h3 class="post-title">{{item.post_title}}</h3>
-                <p class="post-author">By <span>{{item.post_author}}</span></p>
-                <p class="post-date">{{item.post_date}}</p>
+                <article-meta-data article$="{{item}}"></article-meta-data>
                 <p class="post-teaser">{{item.post_teaser}}</p>
               </div>
               <div class="card-actions">
@@ -219,8 +175,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
 
     </app-header-layout>
-
-    <paper-fab icon="app:create"></paper-fab>
   </template>
 
   <script>

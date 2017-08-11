@@ -10,37 +10,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="article-content">
+<dom-module id="article-meta-data">
+
   <template>
-
     <style>
-
+    :host {
+      display: block;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--paper-card-header-color, #000);
+    }
     </style>
 
+    <h3>{{article.post_title}}</h3>
+    <p class="post-author">By <span>{{article.post_author}}</span></p>
+    <p class="post-date">{{article.post_date}}</p>
   </template>
 
   <script>
 
-  // define the element's class element
-  class ArticleContent extends Polymer.Element {
-    static get is() { return 'article-content'; }
-    static get properties() {
-      return {
-        contentMarkup: {
-          type: String
-        }
-      };
+  Polymer({
+
+    is: 'article-meta-data',
+
+    properties: {
+      article: {
+        type: Object
+      }
     }
 
-    connectedCallback() {
-      super.connectedCallback();
-      this.shadowRoot.innerHTML = this.contentMarkup;
-      console.log('my-element created!');
-    }
+  });
 
-  }
-
-  // Associate the new class with an element name
-  customElements.define('article-content', ArticleContent);
   </script>
+
 </dom-module>
