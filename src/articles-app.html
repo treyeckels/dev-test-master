@@ -49,6 +49,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: none;
     }
 
+    .favorites-links {
+      font-size: 12px;
+    }
+
     .avatar-container {
       position: relative;
       border: 2px solid #00AA8D;
@@ -126,10 +130,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
             <!-- Show our saved favs -->
             <template is="dom-if" if="[[favoritesComputed.length]]">
-              <paper-item name="ceh-practice-exam">
-                [[favoritesComputed]]
-                <a href="#/detail/ceh-practice-exam" name="name">How to Pass: CEH Practice</a>
-              </paper-item>
+              <template is="dom-repeat" items="{{favoritesComputed}}"><!-- No empty text node
+              --><paper-item name="[[item.post_name]]">
+                  <a class="favorites-links" href="#/detail/[[item.post_name]]">[[item.post_title]]</a>
+                 </paper-item><!-- No empty text node
+            --></template>
             </template>
           </paper-listbox>
         </app-header-layout>
@@ -163,7 +168,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /**
        * The value of the favorites key in local storage (defaults to a string
        * version of an empty array if key is not in storage). Populated values
-       * are the the article names that the user has "favorited".
+       * are maps of the the article names and titles that the user has "favorited".
        * @prop {String}
        */
       favorites: {
@@ -173,7 +178,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /**
        * Computation of the favorites local storage value to convert from a
        * string to a valid JS object
-       * @prop {Array.<string>}
+       * @prop {Array.<Object.<string>>}
        */
       favoritesComputed: {
         type: Array,
@@ -228,7 +233,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * set in local storage when the user "favorited" them.
      */
     computeFavorites(favorites) {
-      debugger
       try {
         return JSON.parse(favorites);
       } catch(e) {
