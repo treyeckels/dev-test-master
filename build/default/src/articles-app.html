@@ -24,6 +24,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 
 <link rel="import" href="article-detail.html">
 <link rel="import" href="articles-list.html">
@@ -42,6 +45,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     app-drawer-layout:not([narrow]) [drawer-toggle] {
       display: none;
+    }
+
+    .favorites-links {
+      font-size: 12px;
     }
 
     .avatar-container {
@@ -95,6 +102,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     </style>
 
+    <app-localstorage-document key="favorites" data="{{favorites}}">
+
     <app-location route="{{_route}}" use-hash-as-path=""></app-location>
     <app-route route="{{_route}}" pattern="/:page" data="{{_pageData}}" tail="{{_subRoute}}"></app-route>
     <app-route route="{{_subRoute}}" pattern="/:id" data="{{_idData}}"></app-route>
@@ -103,35 +112,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <!-- nav panel -->
       <app-drawer id="drawer" swipe-open="" slot="drawer">
-        <app-header-layout has-scrolling-region="">
-
-          <app-header fixed="" slot="header">
-            <div class="avatar-container">
-              <div class="image"></div>
-            </div>
-            <div class="contact-info">
-              <div class="name">Jonathan</div>
-              <div class="email">heyfromjonathan@gmail.com</div>
-            </div>
-          </app-header>
-
-          <!-- nav menu -->
-          <!-- Two way binding to the selected property has been removed due to polymer/issues/4405 -->
-          <paper-listbox selected="[[_pageData.page]]" attr-for-selected="name" on-iron-activate="_drawerSelected">
-            <paper-item name="home">
-              <a href="#/home" name="name">Home</a>
-            </paper-item>
-            <paper-item name="favorites">
-              <a href="#/favorites" name="name">Favorites</a>
-            </paper-item>
-            <paper-item name="saved">
-              <a href="#/saved" name="name">Saved</a>
-            </paper-item>
-            <paper-item name="trending">
-              <a href="#/trending" name="name">Trending</a>
-            </paper-item>
+          <paper-listbox on-iron-activate="_drawerSelected">
+            <!-- Encourage User to add Favorites -->
+            <template is="dom-if" if="[[!favoritesComputed.length]]">
+              <paper-item>
+                Tap the Heart Icon on an article page to add to your favorites
+              </paper-item>
+            </template>
+            <!-- Show our saved favs -->
+            <template is="dom-if" if="[[favoritesComputed.length]]">
+              <template is="dom-repeat" items="{{favoritesComputed}}"><!-- No empty text node
+              --><paper-item name="[[item.post_name]]">
+                  <a class="favorites-links" href="#/detail/[[item.post_name]]">[[item.post_title]]</a>
+                 </paper-item><!-- No empty text node
+            --></template>
+            </template>
           </paper-listbox>
-        </app-header-layout>
+        
       </app-drawer>
 
       <!-- list/detail pages -->
@@ -141,25 +138,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-icon-button icon="app:menu" drawer-toggle="" slot="drawer-toggle"></paper-icon-button>
         </articles-list>
 
-        <articles-list name="favorites" model="[[model]]">
-          <paper-icon-button icon="app:menu" drawer-toggle="" slot="drawer-toggle"></paper-icon-button>
-        </articles-list>
-
-        <articles-list name="saved" model="[[model]]">
-          <paper-icon-button icon="app:menu" drawer-toggle="" slot="drawer-toggle"></paper-icon-button>
-        </articles-list>
-
-        <articles-list name="trending" model="[[model]]">
-          <paper-icon-button icon="app:menu" drawer-toggle="" slot="drawer-toggle"></paper-icon-button>
-        </articles-list>
-
         <article-detail id="detailView" name="detail" article="[[_getArticle(model, _idData.id)]]"></article-detail>
 
       </iron-pages>
 
     </app-drawer-layout>
 
-  </template>
+  </app-localstorage-document></template>
 
   <script>
 
@@ -168,6 +153,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'articles-app',
 
     properties: {
+      /**
+       * The value of the favorites key in local storage (defaults to a string
+       * version of an empty array if key is not in storage). Populated values
+       * are maps of the the article names and titles that the user has "favorited".
+       * @prop {String}
+       */
+      favorites: {
+        type: String,
+        value: '[]'
+      },
+      /**
+       * Computation of the favorites local storage value to convert from a
+       * string to a valid JS object
+       * @prop {Array.<Object.<string>>}
+       */
+      favoritesComputed: {
+        type: Array,
+        computed: 'computeFavorites(favorites)'
+      },
       /**
        * The payload from the server
        * @prop {Object.<Object.<string>>}
@@ -205,21 +209,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * that the article name would always be unique.
        * @prop string
        */
-      _idData: Object,
-      /**
-       * This alllows us to keep track of the scroll position so that when
-       * the user navigates to another view and then returns, the scroll position
-       * will be in the same Y coordinate as befor scrolling.
-       * @prop {Object.<number>}
-       */
-      _scrollPositionMap: {
-        type: Object,
-        value() {
-          return {};
-        }
+      _idData: Object
+    },
+
+    /**
+     * This ensures we always have a valid Object from local storage to use,
+     * but it looks like the polymer local storage component is already handling parsing
+     * the JSON string, so need to investigate further why I needed to do this.
+     * @param {string} Local storage value of "favorites" key
+     * @return {Array.<string>} An array of the article titles that have been
+     * set in local storage when the user "favorited" them.
+     */
+    computeFavorites(favorites) {
+      try {
+        return JSON.parse(favorites);
+      } catch(e) {
+        console.error(e);
+        return [];
       }
     },
 
+    /**
+     * This ensures we always have a valid route.
+     */
     attached: function() {
       this.async(function() {
         if (!this._route.path) {

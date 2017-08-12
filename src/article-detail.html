@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 <link rel="import" href="article-meta-data.html">
 
 <dom-module id="article-detail">
@@ -123,6 +124,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     </style>
 
+    <app-localstorage-document key="favorites" data="{{favorites}}">
+
     <!-- main panel -->
     <app-header-layout>
 
@@ -145,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <article-meta-data></article-meta-data>
           <div class="article-detail-container card-content"></div>
         </paper-card>
-        <paper-fab icon="{{__computeFavIcon(__favorite)}}" on-tap="__toggleFavorite"></paper-fab>
+        <paper-fab icon="{{_computeFavIcon(_favorite)}}" on-tap="_toggleFavorite"></paper-fab>
       </div>
 
     </app-header-layout>
@@ -158,22 +161,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'article-detail',
 
     properties: {
-
+      /**
+       * Object representation of the article.
+       * @prop {Object.<string>}
+       */
       article: {
         type: Object,
-        observer: '__articleChanged'
+        observer: '_articleChanged'
       },
 
-      __favorite: {
+      /**
+       * Indicates if the user has "favorited" this article.
+       * @prop {boolean}
+       */
+      _favorite: {
         type: Boolean,
         value: false
-      }
+      },
 
+      /**
+       * The value of the favorites key in local storage (defaults to a string
+       * version of an empty array if key is not in storage). Populated values
+       * are maps of the the article names and titles that the user has "favorited".
+       * @prop {string}
+       */
+      favorites: {
+        type: String,
+        value: '[]'
+      }
     },
 
-    __articleChanged: function(article) {
+    /**
+     * This updates the article detail page meta data custom component element by resetting
+     * its article property and updating the detail page article container's
+     * innerHTML. We have to use innerHTML here instead of direct data binding
+     * so that the markup is parsed as Polymer will not allow this through
+     * direct binding in the template.
+     * @param {Object.<string>} article The new article object 
+     */
+    _articleChanged: function(article) {
       if (article) {
-        this.style.backgroundImage = 'url(' + article.headerImage + ')';
+        this.style.backgroundImage = `url(${article.headerImage})`;
         const articleMetaDataElem = this.shadowRoot.querySelector('article-meta-data');
         articleMetaDataElem.article = article;
         const articleContainerElem = this.shadowRoot.querySelector('.article-detail-container');
@@ -181,11 +209,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
-    __toggleFavorite: function(event, detail) {
-      this.__favorite = !this.__favorite;
+    _toggleFavorite: function(event, detail) {
+      const favoritesObj = JSON.parse(this.favorites);
+      const articleName = this.article.post_name;
+      if (!this._favorite) {
+        const articleTitle = this.article.post_title;
+        favoritesObj.push({
+          post_name: articleName,
+          post_title: articleTitle
+        });
+        this.favorites = JSON.stringify(favoritesObj);
+      } else {
+        const newFavoritesObj = favoritesObj.filter((item) => {
+          return item.post_name !== articleName;
+        });
+        this.favorites = JSON.stringify(newFavoritesObj);
+      }
+      this._favorite = !this._favorite;
     },
 
-    __computeFavIcon: function(favorite) {
+    _computeFavIcon: function(favorite) {
       return favorite ? 'app:favorite' : 'app:favorite-border';
     }
 

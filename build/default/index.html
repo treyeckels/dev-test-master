@@ -25,22 +25,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <link rel="stylesheet" href="global.css">
 
   <link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
-  <link rel="import" href="bower_components/polymerfire/polymerfire.html">
-  <link rel="import" href="bower_components/polymerfire/firebase-app-script.html">
-<link rel="import" href="bower_components/polymerfire/firebase-auth-script.html">
-<link rel="import" href="bower_components/polymerfire/firebase-database-script.html">
-<link rel="import" href="bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="src/articles-app.html">
+  <link rel="import" href="src/articles-app.html">
 
 </head>
 <body>
   <dom-bind>
     <template is="dom-bind">
-      <firebase-app app-name="articles" auth-domain="articles-c29a3.firebaseapp.com" database-url="https://articles-c29a3.firebaseio.com/" api-key="AIzaSyA23cacI7GD3NqXmrmjryKsPvBvhVcEJ6A" storage-bucket="articles-c29a3.appspot.com" messaging-sender-id="33208060787">
-      </firebase-app>
-
-      <iron-ajax url="https://articles-c29a3.firebaseio.com/.json" auto="" last-response="{{articles2}}"></iron-ajax>
-      <articles-app model="[[articles2]]"></articles-app>
+      <iron-ajax url="https://articles-c29a3.firebaseio.com/.json" auto="" last-response="{{articles}}"></iron-ajax>
+      <articles-app model="[[articles]]"></articles-app>
     </template>
   </dom-bind>
 

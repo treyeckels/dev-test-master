@@ -263,7 +263,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Using a for loop here instead of a array.forEach
         // so that we can exit ASAP when we find the article
         for (var i = 0; i < this.model.length; ++i) {
-          var currentObj = this.model[i];
+          let currentObj = this.model[i];
           if (currentObj.post_name === this._idData.id) {
             return currentObj;
           }
