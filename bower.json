@@ -21,7 +21,11 @@
     "paper-item": "PolymerElements/paper-item#1 - 2",
     "paper-listbox": "PolymerElements/paper-listbox#1 - 2",
     "paper-menu-button": "PolymerElements/paper-menu-button#1 - 2",
-    "polymer": "Polymer/polymer#1.9 - 2"
+    "polymer": "Polymer/polymer#1.9 - 2",
+    "polymerfire": "~2.1.0",
+    "paper-button": "~2.0.0",
+    "paper-badge": "~2.0.0",
+    "app-storage": "~2.0.2"
   },
   "variants": {
     "1.x": {

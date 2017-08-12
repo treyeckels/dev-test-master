@@ -35,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <body>
   <dom-bind>
     <template is="dom-bind">
-      <iron-ajax url="data/articles-formatted.json" auto last-response="{{articles}}"></iron-ajax>
+      <iron-ajax url="https://articles-c29a3.firebaseio.com/.json" auto last-response="{{articles}}"></iron-ajax>
       <articles-app model="[[articles]]"></articles-app>
     </template>
   </dom-bind>
