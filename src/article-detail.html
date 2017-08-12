@@ -148,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <article-meta-data></article-meta-data>
           <div class="article-detail-container card-content"></div>
         </paper-card>
-        <paper-fab icon="{{_computeFavIcon(_favorite)}}" on-tap="_toggleFavorite"></paper-fab>
+        <paper-fab icon="{{favIcon}}" on-tap="_toggleFavorite"></paper-fab>
       </div>
 
     </app-header-layout>
@@ -174,9 +174,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * Indicates if the user has "favorited" this article.
        * @prop {boolean}
        */
-      _favorite: {
+      isFavorite: {
         type: Boolean,
-        value: false
+        computed: 'computeFavorite(article, favorites)'
       },
 
       /**
@@ -188,7 +188,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       favorites: {
         type: String,
         value: '[]'
+      },
+
+      /**
+       * The icon for the favIcon (indicating "favorited" or not). It is
+       * re-calculated when the the favorite property updates.
+       * @prop {string}
+       */
+      favIcon: {
+        type: String,
+        computed: '_computeFavIcon(isFavorite)'
       }
+    },
+
+    computeFavorite(article, favorites) {
+      if (!article) {
+        return false;
+      }
+
+      const favoritesObj = JSON.parse(favorites);
+      const articleName = article.post_name;
+      for (let i = 0; i < favoritesObj.length; ++i) {
+        let currentObj = favoritesObj[i];
+        if (currentObj.post_name === articleName) {
+          return true;
+        }
+      }
+      return false;
     },
 
     /**
@@ -197,7 +223,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * innerHTML. We have to use innerHTML here instead of direct data binding
      * so that the markup is parsed as Polymer will not allow this through
      * direct binding in the template.
-     * @param {Object.<string>} article The new article object 
+     * @param {Object.<string>} article The new article object
      */
     _articleChanged: function(article) {
       if (article) {
@@ -209,10 +235,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
-    _toggleFavorite: function(event, detail) {
+    _toggleFavorite: function() {
       const favoritesObj = JSON.parse(this.favorites);
       const articleName = this.article.post_name;
-      if (!this._favorite) {
+      if (!this.isFavorite) {
         const articleTitle = this.article.post_title;
         favoritesObj.push({
           post_name: articleName,
@@ -225,11 +251,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
         this.favorites = JSON.stringify(newFavoritesObj);
       }
-      this._favorite = !this._favorite;
+      this.isFavorite = !this.isFavorite;
     },
 
-    _computeFavIcon: function(favorite) {
-      return favorite ? 'app:favorite' : 'app:favorite-border';
+    _computeFavIcon: function(isFavorite) {
+      return isFavorite ? 'app:favorite' : 'app:favorite-border';
     }
 
   });
