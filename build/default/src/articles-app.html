@@ -48,40 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     .favorites-links {
-      font-size: 12px;
-    }
-
-    .avatar-container {
-      position: relative;
-      border: 2px solid #00AA8D;
-      border-radius: 50%;
-      height: 90px;
-      padding: 2px;
-      width: 90px;
-      margin: 20px auto;
-    }
-
-    .avatar-container .image {
-      background-image: url('//app-layout-assets.appspot.com/assets/pesto/avatar.jpg');
-      background-size: contain;
-      border-radius: 50%;
-      height: 100%;
-      width: 100%;
-    }
-
-    .contact-info {
-      margin: 0 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #CCC;
-      text-align: center;
-    }
-
-    .contact-info .name {
-      font-weight: bold;
-    }
-
-    .contact-info .email {
-      color: #999;
+      font-size: 10px;
     }
 
     paper-item {
@@ -104,15 +71,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <app-localstorage-document key="favorites" data="{{favorites}}">
 
-    <app-location route="{{_route}}" use-hash-as-path=""></app-location>
-    <app-route route="{{_route}}" pattern="/:page" data="{{_pageData}}" tail="{{_subRoute}}"></app-route>
-    <app-route route="{{_subRoute}}" pattern="/:id" data="{{_idData}}"></app-route>
+    <app-location route="{{route}}" use-hash-as-path=""></app-location>
+    <app-route route="{{route}}" pattern="/:page" data="{{_pageData}}" tail="{{_subRoute}}"></app-route>
+    <app-route route="{{_subRoute}}" pattern="/:id" data="{{idData}}"></app-route>
 
     <app-drawer-layout responsive-width="1280px">
 
       <!-- nav panel -->
       <app-drawer id="drawer" swipe-open="" slot="drawer">
-          <paper-listbox on-iron-activate="_drawerSelected">
+          <paper-listbox on-iron-activate="drawerSelected">
             <!-- Encourage User to add Favorites -->
             <template is="dom-if" if="[[!favoritesComputed.length]]">
               <paper-item>
@@ -132,13 +99,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-drawer>
 
       <!-- list/detail pages -->
-      <iron-pages selected="[[_selectedPage]]" attr-for-selected="name">
+      <iron-pages selected="[[selectedPage]]" attr-for-selected="name">
 
         <articles-list name="home" model="[[model]]">
           <paper-icon-button icon="app:menu" drawer-toggle="" slot="drawer-toggle"></paper-icon-button>
         </articles-list>
 
-        <article-detail id="detailView" name="detail" article="[[_getArticle(model, _idData.id)]]"></article-detail>
+        <article-detail id="detailView" name="detail" article="[[getArticle(model, idData.id)]]"></article-detail>
 
       </iron-pages>
 
@@ -181,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * The Route object -- data provided by the Polymer App Router
        * @prop {Object.<string>}
        */
-      _route: Object,
+      route: Object,
       /**
        * The Sub Route object - data provided by the Polymer App Router
        * @prop {Object.<string>}
@@ -193,23 +160,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        */
       _pageData: {
         type: Object,
-        observer: '_pageDataChanged'
+        observer: 'pageDataChanged'
       },
       /**
        * This comes from a property of the _pageData object given to us by the
        * app router
        * @prop {string}
        */
-      _selectedPage: String,
+      selectedPage: String,
       /**
-       * This comes from a property of the _idData object given to us by the
+       * This comes from a property of the idData object given to us by the
        * app router. It represents the id of the article being viewed on the
        * detail page. Note: We are using the article name so that the url
        * is more SEO and user friendly vs the article ID with the assumption
        * that the article name would always be unique.
        * @prop string
        */
-      _idData: Object
+      idData: Object
     },
 
     /**
@@ -234,8 +201,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      */
     attached: function() {
       this.async(function() {
-        if (!this._route.path) {
-          this.set('_route.path', '/home');
+        if (!this.route.path) {
+          this.set('route.path', '/home');
         }
       });
     },
@@ -246,13 +213,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * out 1 more layer to be able to get the article based on other model
      * props by padding in the prop as an argument.
      */
-    _getArticle: function() {
-      if (this.model && this._idData && this._idData.id) {
+    getArticle: function() {
+      if (this.model && this.idData && this.idData.id) {
         // Using a for loop here instead of a array.forEach
         // so that we can exit ASAP when we find the article
         for (var i = 0; i < this.model.length; ++i) {
-          var currentObj = this.model[i];
-          if (currentObj.post_name === this._idData.id) {
+          let currentObj = this.model[i];
+          if (currentObj.post_name === this.idData.id) {
             return currentObj;
           }
         }
@@ -262,7 +229,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     /**
      * Ensures the drawer is closed when user clicks elsewhere on page.
      */
-    _drawerSelected: function() {
+    drawerSelected: function() {
       if (!this.$.drawer.persistent) {
         this.$.drawer.close();
       }
@@ -275,8 +242,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * which gives us information regarding the app location to which the user
      * is nvaigating.
      */
-    _pageDataChanged: function(pageData) {
-      this._selectedPage = pageData.page;
+    pageDataChanged: function(pageData) {
+      this.selectedPage = pageData.page;
     }
 
   });

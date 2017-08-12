@@ -15,14 +15,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
-<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 <link rel="import" href="article-meta-data.html">
@@ -33,95 +28,72 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <style>
 
-    :host {
-      display: block;
-      background-attachment: fixed;
-      background-size: 100% auto;
-      background-repeat: no-repeat;
-    }
+      :host {
+        display: block;
+        background-attachment: fixed;
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+      }
 
-    #header {
-      color: white;
+      #header {
+        color: white;
 
-      --app-header-background-rear-layer: {
-        background-color: #00AA8D;
-      };
-    }
+        --app-header-background-rear-layer: {
+          background-color: #00AA8D;
+        };
+      }
 
-    paper-icon-button {
-      color: white;
-      --paper-icon-button-ink-color: white;
-    }
-
-    .card-container {
-      position: relative;
-      width: 85%;
-      margin: 40px auto 0 auto;
-    }
-
-    .js-progressiveMedia-image.alignleft {
-      float: left;
-      margin-right: 10px;
-    }
-
-    paper-fab {
-      position: absolute;
-      top: -28px;
-      right: 40px;
-
-      --paper-fab-background: #EF5458;
-      --paper-fab-keyboard-focus-background: #DF4448;
-    }
-
-    paper-card {
-      width: 100%;
-    }
-
-    paper-card p {
-      margin: 12px 0;
-      color: #999;
-    }
-
-    h4 {
-      margin: 60px 0 12px;
-    }
-
-    .ingredient-item {
-      margin: 20px 0;
-      @apply --layout-horizontal;
-    }
-
-    .ingredient-amount {
-      margin-left: -80px;
-      width: 60px;
-      padding-right: 20px;
-      color: rgb(33, 169, 143);
-      text-align: right;
-    }
-
-    .ingredient-name {
-      @apply --layout-flex;
-    }
-
-    .size-full {
-      width: 100%;
-      height: auto;
-    }
-
-    .article-meta-data {
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 400;
-      color: var(--paper-card-header-color, #000);
-    }
-
-    @media (max-width: 720px) {
+      paper-icon-button {
+        color: white;
+        --paper-icon-button-ink-color: white;
+      }
 
       .card-container {
-        width: 100%;
-        margin: 150px 0 0;
+        position: relative;
+        width: 85%;
+        margin: 40px auto 0 auto;
       }
-    }
+
+      .js-progressiveMedia-image.alignleft {
+        float: left;
+        margin-right: 10px;
+      }
+
+      paper-fab {
+        position: absolute;
+        top: -28px;
+        right: 40px;
+
+        --paper-fab-background: #EF5458;
+        --paper-fab-keyboard-focus-background: #DF4448;
+      }
+
+      paper-card {
+        width: 100%;
+      }
+
+      paper-card p {
+        margin: 12px 0;
+        color: #999;
+      }
+
+      h4 {
+        margin: 60px 0 12px;
+      }
+
+      .article-meta-data {
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--paper-card-header-color, #000);
+      }
+
+      @media (max-width: 720px) {
+        .card-container {
+          width: 100%;
+          margin: 150px 0 0;
+        }
+      }
     </style>
 
     <app-localstorage-document key="favorites" data="{{favorites}}">
@@ -130,17 +102,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-header-layout>
 
       <app-header id="header" effects="waterfall fade-background" reveals slot="header">
-
-        <!-- top toolbar -->
         <app-toolbar>
           <!-- back button -->
           <a href="#/home" tabindex="-1">
             <paper-icon-button icon="app:arrow-back"></paper-icon-button>
           </a>
-
           <div main-title>Back to Article Listings</div>
         </app-toolbar>
-
       </app-header>
 
       <div class="card-container">
@@ -201,6 +169,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
+    /**
+     * This determines if the article has been "favorited" by the user.
+     * @param {Object.<string>} article The new article object
+     * @param {string} favorites String Representation of the favorites value in
+     * local storage.
+     */
     computeFavorite(article, favorites) {
       if (!article) {
         return false;

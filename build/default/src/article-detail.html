@@ -13,15 +13,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
-<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
 <link rel="import" href="article-meta-data.html">
 
 <dom-module id="article-detail">
@@ -83,28 +79,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       margin: 60px 0 12px;
     }
 
-    .ingredient-item {
-      margin: 20px 0;
-      @apply --layout-horizontal;
-    }
-
-    .ingredient-amount {
-      margin-left: -80px;
-      width: 60px;
-      padding-right: 20px;
-      color: rgb(33, 169, 143);
-      text-align: right;
-    }
-
-    .ingredient-name {
-      @apply --layout-flex;
-    }
-
-    .size-full {
-      width: 100%;
-      height: auto;
-    }
-
     .article-meta-data {
       padding: 16px;
       font-size: 16px;
@@ -113,7 +87,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     @media (max-width: 720px) {
-
       .card-container {
         width: 100%;
         margin: 150px 0 0;
@@ -121,21 +94,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     </style>
 
+    <app-localstorage-document key="favorites" data="{{favorites}}">
+
     <!-- main panel -->
     <app-header-layout>
 
       <app-header id="header" effects="waterfall fade-background" reveals="" slot="header">
-
-        <!-- top toolbar -->
         <app-toolbar>
           <!-- back button -->
           <a href="#/home" tabindex="-1">
             <paper-icon-button icon="app:arrow-back"></paper-icon-button>
           </a>
-
           <div main-title="">Back to Article Listings</div>
         </app-toolbar>
-
       </app-header>
 
       <div class="card-container">
@@ -143,11 +114,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <article-meta-data></article-meta-data>
           <div class="article-detail-container card-content"></div>
         </paper-card>
-        <paper-fab icon="{{__computeFavIcon(__favorite)}}" on-tap="__toggleFavorite"></paper-fab>
+        <paper-fab icon="{{favIcon}}" on-tap="_toggleFavorite"></paper-fab>
       </div>
 
     </app-header-layout>
-  </template>
+  </app-localstorage-document></template>
 
   <script>
 
@@ -156,22 +127,79 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'article-detail',
 
     properties: {
-
+      /**
+       * Object representation of the article.
+       * @prop {Object.<string>}
+       */
       article: {
         type: Object,
-        observer: '__articleChanged'
+        observer: '_articleChanged'
       },
 
-      __favorite: {
+      /**
+       * Indicates if the user has "favorited" this article.
+       * @prop {boolean}
+       */
+      isFavorite: {
         type: Boolean,
-        value: false
-      }
+        computed: 'computeFavorite(article, favorites)'
+      },
 
+      /**
+       * The value of the favorites key in local storage (defaults to a string
+       * version of an empty array if key is not in storage). Populated values
+       * are maps of the the article names and titles that the user has "favorited".
+       * @prop {string}
+       */
+      favorites: {
+        type: String,
+        value: '[]'
+      },
+
+      /**
+       * The icon for the favIcon (indicating "favorited" or not). It is
+       * re-calculated when the the favorite property updates.
+       * @prop {string}
+       */
+      favIcon: {
+        type: String,
+        computed: '_computeFavIcon(isFavorite)'
+      }
     },
 
-    __articleChanged: function(article) {
+    /**
+     * This determines if the article has been "favorited" by the user.
+     * @param {Object.<string>} article The new article object
+     * @param {string} favorites String Representation of the favorites value in
+     * local storage.
+     */
+    computeFavorite(article, favorites) {
+      if (!article) {
+        return false;
+      }
+
+      const favoritesObj = JSON.parse(favorites);
+      const articleName = article.post_name;
+      for (let i = 0; i < favoritesObj.length; ++i) {
+        let currentObj = favoritesObj[i];
+        if (currentObj.post_name === articleName) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
+     * This updates the article detail page meta data custom component element by resetting
+     * its article property and updating the detail page article container's
+     * innerHTML. We have to use innerHTML here instead of direct data binding
+     * so that the markup is parsed as Polymer will not allow this through
+     * direct binding in the template.
+     * @param {Object.<string>} article The new article object
+     */
+    _articleChanged: function(article) {
       if (article) {
-        this.style.backgroundImage = 'url(' + article.headerImage + ')';
+        this.style.backgroundImage = `url(${article.headerImage})`;
         const articleMetaDataElem = this.shadowRoot.querySelector('article-meta-data');
         articleMetaDataElem.article = article;
         const articleContainerElem = this.shadowRoot.querySelector('.article-detail-container');
@@ -179,12 +207,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
-    __toggleFavorite: function(event, detail) {
-      this.__favorite = !this.__favorite;
+    _toggleFavorite: function() {
+      const favoritesObj = JSON.parse(this.favorites);
+      const articleName = this.article.post_name;
+      if (!this.isFavorite) {
+        const articleTitle = this.article.post_title;
+        favoritesObj.push({
+          post_name: articleName,
+          post_title: articleTitle
+        });
+        this.favorites = JSON.stringify(favoritesObj);
+      } else {
+        const newFavoritesObj = favoritesObj.filter((item) => {
+          return item.post_name !== articleName;
+        });
+        this.favorites = JSON.stringify(newFavoritesObj);
+      }
+      this.isFavorite = !this.isFavorite;
     },
 
-    __computeFavIcon: function(favorite) {
-      return favorite ? 'app:favorite' : 'app:favorite-border';
+    _computeFavIcon: function(isFavorite) {
+      return isFavorite ? 'app:favorite' : 'app:favorite-border';
     }
 
   });
